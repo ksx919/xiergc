@@ -1,11 +1,11 @@
 <template>
   <div>
-    <SettingCenter />
+    <PersonalCenter />
   </div>
 </template>
 
 <script setup>
-import SettingCenter from "@/components/SettingCenter.vue";
+import PersonalCenter from "@/components/PersonalCenter/PersonalCenter.vue";
 </script>
 
 <style scoped>
