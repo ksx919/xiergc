@@ -1,5 +1,6 @@
 package com.example.xiergc.controller;
 
+import com.example.xiergc.entity.Article;
 import com.example.xiergc.entity.Result;
 import com.example.xiergc.entity.User;
 import com.example.xiergc.service.UserService;
@@ -15,6 +16,7 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -132,5 +134,30 @@ public class UserController {
         return Result.success();
     }
 
+    //查询用户创建的文章
+    @GetMapping("/created")
+    public Result<List<Article>> created() {
+        Map<String,Object> map= ThreadLocalUtil.get();
+        int id =(int) map.get("id");
+        List<Article> articles = userService.GetCreated(id);
+        return Result.success(articles);
+    }
 
+    //查询用户点赞的文章
+    @GetMapping("/liked")
+    public Result<List<Article>> liked() {
+        Map<String,Object> map= ThreadLocalUtil.get();
+        int id =(int) map.get("id");
+        List<Article> articles = userService.Getliked(id);
+        return Result.success(articles);
+    }
+
+    //查询用户收藏的文章
+    @GetMapping("/collected")
+    public Result<List<Article>> collected() {
+        Map<String,Object> map= ThreadLocalUtil.get();
+        int id =(int) map.get("id");
+        List<Article> articles = userService.GetCollected(id);
+        return Result.success(articles);
+    }
 }

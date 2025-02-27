@@ -1,5 +1,6 @@
 package com.example.xiergc.service.impl;
 
+import com.example.xiergc.entity.Article;
 import com.example.xiergc.entity.User;
 import com.example.xiergc.mapper.UserMapper;
 import com.example.xiergc.service.UserService;
@@ -8,6 +9,7 @@ import com.example.xiergc.utils.ThreadLocalUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -52,5 +54,23 @@ public class UserServiceImpl implements UserService {
         Map<String,Object> map= ThreadLocalUtil.get();
         int id=(int) map.get("id");
         userMapper.updatePwd(MD5Utils.string2MD5(newPwd),id);
+    }
+
+    @Override
+    public List<Article> GetCreated(int id) {
+        List<Article> articles = userMapper.GetCreated(id);
+        return articles;
+    }
+
+    @Override
+    public List<Article> Getliked(int id) {
+        List<Article> articles = userMapper.GetLiked(id);
+        return articles;
+    }
+
+    @Override
+    public List<Article> GetCollected(int id) {
+        List<Article> articles = userMapper.GetCollected(id);
+        return articles;
     }
 }

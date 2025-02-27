@@ -53,18 +53,6 @@ public interface ArticleMapper {
             "WHERE a.id = #{id}")
     Article getArticleById(int id);
 
-    @Insert("INSERT INTO article_likes (user_id, article_id) VALUES (#{userId}, #{articleId})")
-    void addArticleLike(int userId, int articleId);
-
-    @Insert("INSERT INTO article_collections (user_id, article_id) VALUES (#{userId}, #{articleId})")
-    void addArticleCollection(int userId, int articleId);
-
-    @Update("UPDATE articles SET likes = likes + 1 WHERE id = #{id}")
-    void incrementArticleLikes(int id);
-
-    @Update("UPDATE articles SET collect = collect + 1 WHERE id = #{id}")
-    void incrementArticleCollect(int id);
-
     @Insert("INSERT INTO comments (article_id, author_id, content, publish_date) " +
             "VALUES (#{articleId}, #{authorId}, #{content}, NOW())")
     void addComment(int articleId,int authorId,String content);

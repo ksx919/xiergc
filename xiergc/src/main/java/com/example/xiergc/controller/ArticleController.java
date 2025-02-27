@@ -109,5 +109,4 @@ public class ArticleController {
         articleService.deleteComment(articleId, commentId);
         return Result.success();
     }
-
 }
