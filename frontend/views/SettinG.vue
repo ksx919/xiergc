@@ -1,11 +1,11 @@
 <template>
   <div>
-    <SettingCemter />
+    <SettingCenter />
   </div>
 </template>
 
 <script setup>
-import SettingCemter from "@/components/SettingCemter.vue";
+import SettingCenter from "@/components/SettingCenter.vue";
 </script>
 
 <style scoped>
