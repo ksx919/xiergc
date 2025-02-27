@@ -195,6 +195,7 @@
 import { ref } from "vue";
 import NavBar from "./NavBar.vue"; // 引入导航栏组件
 import settingIconSrc from "@/assets/image/setting.png";
+import axios from "axios";
 // 引入背景样式文件
 import "@/components/background/background.css";
 
@@ -238,13 +239,21 @@ const handleClick = (section) => {
 // 回到个人主页
 const goToPersonalPage = () => {
   // 这里假设 PersonAl.vue 对应的路由路径是 /personal
-  window.location.href = "/personal";
+  window.location.href = "/profile";
 };
 
 // 保存个人资料修改
-const saveProfile = () => {
-  console.log("保存个人资料修改:", { username: profile.value.username });
-  // 这里可以添加实际的保存逻辑，比如发送请求到后端
+const saveProfile = async () => {
+  try {
+    const response = await axios.put("http://localhost:8080/user/name", {
+      name: profile.value.username,
+    });
+    if (response.data.status === "success") {
+      console.log("用户名修改成功");
+    }
+  } catch (error) {
+    console.error("修改用户名失败:", error);
+  }
 };
 
 // 检查密码是否一致
@@ -254,16 +263,22 @@ const checkPasswords = () => {
 };
 
 // 保存账户设置修改
-const saveAccount = () => {
+const saveAccount = async () => {
   checkPasswords();
   if (passwordsDoNotMatch.value) {
     return;
   }
-  console.log("保存账户设置修改:", {
-    oldPassword: account.value.oldPassword,
-    newPassword: account.value.newPassword,
-  });
-  // 这里可以添加实际的保存逻辑，比如发送请求到后端
+  try {
+    const response = await axios.put("http://localhost:8080/user/password", {
+      oldPassword: account.value.oldPassword,
+      newPassword: account.value.newPassword,
+    });
+    if (response.data.status === "success") {
+      console.log("密码修改成功");
+    }
+  } catch (error) {
+    console.error("修改密码失败:", error);
+  }
 };
 
 // 回到登录页面
