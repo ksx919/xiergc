@@ -1,25 +1,41 @@
 <template>
   <div class="article-box">
     <div class="article-top">
-      <img
-        class="top-right-icon"
-        src="@/assets/image/deng.png"
-        alt="右上角图标"
-      />
       <div class="article-info">
         <h2>{{ article.title }}</h2>
-        <p>{{ article.content }}</p>
+        <p>{{ article.description }}</p>
       </div>
+    </div>
+    <div class="article-images">
+      <!-- 封面图片 -->
+      <img class="cover" :src="article.coverSrc" alt="封面" />
+      <!-- 其他图片 -->
+      <img
+        v-for="(img, index) in article.otherImages"
+        :key="index"
+        :src="img"
+        alt="文章图片"
+      />
     </div>
     <div class="article-bottom">
       <span class="date">{{ article.date }}</span>
       <div class="article-actions">
         <img class="action-icon" :src="clickIconSrc" alt="点击数" />
         <span>{{ article.clickCount }}</span>
-        <img class="action-icon" :src="collectIconSrc" alt="收藏" />
-        <span>{{ article.collectCount }}</span>
-        <img class="action-icon" :src="likeIconSrc" alt="喜欢" />
+        <font-awesome-icon
+          :icon="isLiked ? faHeart : faHeartRegular"
+          class="action-icon"
+          :class="{ 'gray-icon': isLiked }"
+          @click="toggleLike"
+        />
         <span>{{ article.likeCount }}</span>
+        <font-awesome-icon
+          :icon="isCollected ? faBookmark : faBookmarkRegular"
+          class="action-icon"
+          :class="{ 'gray-icon': isCollected }"
+          @click="toggleCollect"
+        />
+        <span>{{ article.collectCount }}</span>
         <img class="action-icon" :src="commentIconSrc" alt="评论数量" />
         <span>{{ article.commentCount }}</span>
       </div>
@@ -40,77 +56,97 @@
 
 <script setup>
 import { ref } from "vue";
-import { onMounted } from "vue";
+import { useAttrs } from "vue";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { faHeart, faBookmark } from "@fortawesome/free-solid-svg-icons";
+import {
+  faHeart as faHeartRegular,
+  faBookmark as faBookmarkRegular,
+} from "@fortawesome/free-regular-svg-icons";
 import axios from "axios";
-import { useRoute } from 'vue-router';
 
-const route = useRoute();
+const attrs = useAttrs();
+const article = ref(attrs.article);
 
 // 图片路径
 const clickIconSrc = require("@/assets/image/click.png");
-const collectIconSrc = require("@/assets/image/collect.png");
-const likeIconSrc = require("@/assets/image/like.png");
 const commentIconSrc = require("@/assets/image/comment.png");
 const sendIconSrc = require("@/assets/image/write.png");
 
-// 初始化文章数据
-const article = ref({
-  title: '加载中...',
-  content: '',
-  date: '',
-  clickCount: 0,
-  collectCount: 0,
-  likeCount: 0,
-  commentCount: 0
-})
-const formatDate = (dateArray) => {
-  if (!dateArray) return '';
-  const [year, month, day, hour, minute] = dateArray;
-  return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')} ${hour}:${minute.toString().padStart(2, '0')}`;
+// 确保这里的路径是正确的
+article.value = {
+  id: 1,
+  title: "文章标题",
+  description: "文章描述",
+  // 使用 require 来正确处理图片路径
+  coverSrc: require("@/assets/image/postimg.png"),
+  otherImages: [require("@/assets/image/postimg2.png")],
+  date: "2024-01-01",
+  clickCount: 100,
+  collectCount: 20,
+  likeCount: 30,
+  commentCount: 10,
 };
 
-const fetchArticle = async (id) => {
-  try {
-    const jwtToken =localStorage.getItem("jwtToken");
-    const { data } = await axios.get(`http://localhost:8080/articles/${id}`,{
-      headers: {
-        Authorization: `${jwtToken}`,
-      },
-    });
-    
-    if (data.code === 0) {
-      article.value = {
-        title: data.data.title,
-        content: data.data.content,
-        date: formatDate(data.data.publishDate),
-        clickCount: data.data.clicks,
-        collectCount: data.data.collect,
-        likeCount: data.data.likes,
-        commentCount: data.data.comment
-      };
-    } else {
-      console.error('获取文章失败:', data.msg);
-    }
-  } catch (error) {
-    console.error('请求失败:', error);
-  }
-};
-
-// 确保正确获取路由参数
-onMounted(() => {
-  const articleId = route.params.id
-  if (articleId) {
-    fetchArticle(articleId)
-  }
-})
+// 点赞和收藏状态
+const isLiked = ref(false);
+const isCollected = ref(false);
 
 // 评论相关状态
 const commentContent = ref("");
 
-const sendComment = () => {
-  // 这里可以添加发送评论的逻辑
-  console.log("发送评论:", commentContent.value);
-  commentContent.value = "";
+const toggleLike = async () => {
+  try {
+    const url = `http://localhost:8080/articles/${article.value.id}/like`;
+    const response = await axios.post(url);
+    if (response.status === 200) {
+      isLiked.value = !isLiked.value;
+      if (isLiked.value) {
+        article.value.likeCount++;
+      } else {
+        article.value.likeCount--;
+      }
+    }
+  } catch (error) {
+    console.error("点赞失败:", error);
+  }
+};
+
+const toggleCollect = async () => {
+  try {
+    const url = `http://localhost:8080/articles/${article.value.id}/collect`;
+    const response = await axios.post(url);
+    if (response.status === 200) {
+      isCollected.value = !isCollected.value;
+      if (isCollected.value) {
+        article.value.collectCount++;
+      } else {
+        article.value.collectCount--;
+      }
+    }
+  } catch (error) {
+    console.error("收藏失败:", error);
+  }
+};
+
+const sendComment = async () => {
+  if (commentContent.value.trim() === "") {
+    return;
+  }
+  try {
+    const url = `http://localhost:8080/articles/${article.value.id}/comments`;
+    const data = {
+      content: commentContent.value,
+    };
+    const response = await axios.post(url, data);
+    if (response.status === 200) {
+      console.log("发送评论成功:", response.data);
+      article.value.commentCount++;
+      commentContent.value = "";
+    }
+  } catch (error) {
+    console.error("发送评论失败:", error);
+  }
 };
 </script>
 
@@ -129,14 +165,6 @@ const sendComment = () => {
 .article-top {
   position: relative;
   text-align: left;
-}
-
-.top-right-icon {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 5px;
-  height: 20px;
 }
 
 .article-info {
@@ -179,6 +207,12 @@ const sendComment = () => {
   width: 20px;
   height: 20px;
   margin-left: 20px;
+  cursor: pointer;
+}
+
+/* 新增灰色图标样式 */
+.gray-icon {
+  color: gray;
 }
 
 /* 新增文章底部评论框样式 */

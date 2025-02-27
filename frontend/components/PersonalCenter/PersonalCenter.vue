@@ -50,7 +50,7 @@
           </a>
         </div>
         <!-- 昵称 -->
-        <div class="nickname">用户昵称</div>
+        <div class="nickname">{{ userInfo.username }}</div>
         <!-- 两条横分割线 -->
         <div class="horizontal-dividers">
           <div class="divider"></div>
@@ -104,8 +104,9 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import ArticleItem from "./ArticleItem.vue";
+import axios from "axios";
 
 // 图片路径
 const backgroundImageSrc = require("@/assets/image/backgroundp.png");
@@ -115,73 +116,13 @@ const settingIconSrc = require("@/assets/image/setting.png");
 // 设置中心跳转链接
 const settingUrl = "/setting";
 
-// 文章列表
-const articles = ref([
-  {
-    id: 1,
-    title: "文章标题 1",
-    link: "/article/1",
-    clickCount: 100,
-    collectCount: 20,
-    likeCount: 30,
-    commentCount: 10,
-    description: "文章描述 1",
-  },
-  {
-    id: 2,
-    title: "文章标题 2",
-    link: "/article/2",
-    clickCount: 200,
-    collectCount: 30,
-    likeCount: 40,
-    commentCount: 20,
-    description: "文章描述 2",
-  },
-  {
-    id: 3,
-    title: "文章标题 3",
-    link: "/article/3",
-    clickCount: 300,
-    collectCount: 40,
-    likeCount: 50,
-    commentCount: 30,
-    description: "文章描述 3",
-  },
-  {
-    id: 4,
-    title: "文章标题 4",
-    link: "/article/4",
-    clickCount: 400,
-    collectCount: 50,
-    likeCount: 60,
-    commentCount: 40,
-    description: "文章描述 4",
-  },
-]);
+// 用户信息
+const userInfo = ref({});
 
+// 文章列表
+const articles = ref([]);
 // 点赞文章列表
-const likedArticles = ref([
-  {
-    id: 5,
-    title: "点赞文章标题 1",
-    link: "/liked-article/1",
-    clickCount: 150,
-    collectCount: 25,
-    likeCount: 45,
-    commentCount: 15,
-    description: "点赞文章描述 1",
-  },
-  {
-    id: 6,
-    title: "点赞文章标题 2",
-    link: "/liked-article/2",
-    clickCount: 250,
-    collectCount: 35,
-    likeCount: 55,
-    commentCount: 25,
-    description: "点赞文章描述 2",
-  },
-]);
+const likedArticles = ref([]);
 
 // 当前显示的文章列表
 const currentTab = ref("articles");
@@ -210,14 +151,48 @@ const handleAvatarLeave = () => {
 };
 
 // 处理文件选择事件
-const handleFileChange = (e) => {
+const handleFileChange = async (e) => {
   const file = e.target.files[0];
   if (file) {
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      avatarSrc.value = event.target.result;
-    };
-    reader.readAsDataURL(file);
+    try {
+      // 创建 FormData 对象用于上传文件
+      const formData = new FormData();
+      formData.append("file", file);
+
+      // 发送 POST 请求上传文件
+      const uploadResponse = await axios.post(
+        "http://localhost:8080/upload",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      const avatarUrl = uploadResponse.data.avatarUrl; // 假设后端返回的图片地址在 avatarUrl 字段中
+
+      // 发送 PATCH 请求更新用户头像
+      const token = localStorage.getItem("jwtToken"); // 从本地存储中获取 token
+      await axios.patch(
+        "http://localhost:8080/user/avatar",
+        {
+          avatarUrl,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      // 更新本地头像显示
+      avatarSrc.value = avatarUrl;
+      showAvatarModal.value = false;
+    } catch (error) {
+      console.error("上传头像出错:", error);
+    }
   }
 };
 
@@ -238,6 +213,24 @@ const deleteArticle = (articleId) => {
     );
   }
 };
+
+// 获取用户个人信息
+const fetchUserInfo = async () => {
+  try {
+    const response = await axios.get("/user/profile");
+    userInfo.value = response.data;
+    avatarSrc.value = response.data.avatar;
+    articles.value = response.data.articles;
+    likedArticles.value = response.data.likedArticles;
+  } catch (error) {
+    console.error("获取用户信息出错:", error);
+  }
+};
+
+// 组件挂载时获取用户信息
+onMounted(() => {
+  fetchUserInfo();
+});
 </script>
 
 <style scoped>
@@ -353,8 +346,8 @@ const deleteArticle = (articleId) => {
 }
 
 .setting-icon {
-  width: 30px;
-  height: 30px;
+  width: 24px;
+  height: 24px;
 }
 
 .nickname {
