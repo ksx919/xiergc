@@ -5,7 +5,7 @@
 </template>
 
 <script setup>
-import PersonalCenter from "../components/PersonalCenter.vue";
+import PersonalCenter from "@/components/PersonalCenter/PersonalCenter.vue";
 </script>
 
 <style scoped>
