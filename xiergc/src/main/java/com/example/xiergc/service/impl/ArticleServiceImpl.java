@@ -7,14 +7,20 @@ import com.example.xiergc.mapper.ArticleMapper;
 import com.example.xiergc.service.ArticleService;
 import com.example.xiergc.utils.ThreadLocalUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class ArticleServiceImpl implements ArticleService {
+
+    @Autowired
+    private StringRedisTemplate redisTemplate;
 
     @Autowired
     private ArticleMapper articleMapper;
@@ -99,6 +105,28 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
+    public List<Comment> GetComment(int articleId) {
+        List<Comment> comments = articleMapper.GetComment(articleId);
+        return comments;
+    }
+
+    @Override
+    public void deleteArticle(int articleId) {
+        articleMapper.deleteArticle(articleId);
+    }
+
+    @Override
+    public int getAuthorIdById(int articleId) {
+        int authorId = articleMapper.getAuthorIdById(articleId);
+        return authorId;
+    }
+
+    @Override
+    public List<Article> searchArticles(String keyword) {
+        return articleMapper.searchArticles(keyword);
+    }
+
+    @Override
     public void publishArticle(Article article) {
         Map<String,Object> map= ThreadLocalUtil.get();
         int authorId=(int) map.get("id");
@@ -120,26 +148,48 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     @Transactional
     public void toggleLike(int articleId, int userId) {
+        String likeKey = "like:" + userId + ":" + articleId;
+        ValueOperations<String, String> ops = redisTemplate.opsForValue();
         boolean exists = articleMapper.existsLike(userId, articleId);
         if (exists) {
+            ops.set(likeKey, "liked", 3600, TimeUnit.SECONDS);
+        }
+        String cachedLikeStatus = ops.get(likeKey);
+
+        if (cachedLikeStatus != null) {
             articleMapper.removeLike(userId, articleId);
             articleMapper.updateLikes(articleId, -1);
+
+            redisTemplate.delete(likeKey);
         } else {
             articleMapper.addLike(userId, articleId);
             articleMapper.updateLikes(articleId, 1);
+
+            ops.set(likeKey, "liked", 3600, TimeUnit.SECONDS);
         }
     }
 
     @Override
     @Transactional
     public void toggleCollect(int articleId, int userId) {
+        String collectKey = "collect:" + userId + ":" + articleId;
+        ValueOperations<String, String> ops = redisTemplate.opsForValue();
         boolean exists = articleMapper.existsCollect(userId, articleId);
         if (exists) {
+            ops.set(collectKey, "collected", 3600, TimeUnit.SECONDS);
+        }
+        String cachedCollectStatus = ops.get(collectKey);
+
+        if (cachedCollectStatus != null) {
             articleMapper.removeCollect(userId, articleId);
             articleMapper.updateCollects(articleId, -1);
+
+            redisTemplate.delete(collectKey);
         } else {
             articleMapper.addCollect(userId, articleId);
             articleMapper.updateCollects(articleId, 1);
+
+            ops.set(collectKey, "collected", 3600, TimeUnit.SECONDS);
         }
     }
 }

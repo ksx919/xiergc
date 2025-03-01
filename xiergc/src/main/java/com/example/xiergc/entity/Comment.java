@@ -17,4 +17,6 @@ public class Comment {
     private LocalDateTime publishDate; // 使用Java 8时间类型
     @Column(name = "reply_to")
     private Integer replyTo;
+    private String authorName;
+    private String authorAvatar;
 }

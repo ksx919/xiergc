@@ -41,10 +41,16 @@ public interface ArticleMapper {
     @Update("UPDATE articles SET collect = collect + #{amount} WHERE id = #{id}")
     void updateCollects(@Param("id") int id, @Param("amount") int amount);
 
-    @Select("SELECT a.*,u.name as authorName,u.avatar_url as authorAvatarUrl FROM articles a left join user u on a.author_id=u.id ORDER BY clicks DESC LIMIT 10")
+    @Select("SELECT a.*, u.name as authorName, u.avatar_url as authorAvatarUrl " +
+            "FROM articles a " +
+            "LEFT JOIN user u ON a.author_id = u.id " +
+            "ORDER BY clicks DESC LIMIT 10")
     List<Article> getArticlesRankedByClicks();
 
-    @Select("SELECT a.*,u.name as authorName,u.avatar_url as authorAvatarUrl FROM articles a left join user u on a.author_id=u.id ORDER BY publish_date DESC LIMIT 10")
+    @Select("SELECT a.*, u.name as authorName, u.avatar_url as authorAvatarUrl " +
+            "FROM articles a " +
+            "LEFT JOIN user u ON a.author_id = u.id " +
+            "ORDER BY publish_date DESC LIMIT 10")
     List<Article> getLatestArticles();
 
     @Select("SELECT a.*, u.name AS authorName, u.avatar_url AS authorAvatarUrl " +
@@ -86,4 +92,22 @@ public interface ArticleMapper {
 
     @Update("UPDATE articles SET comment = comment - #{count} WHERE id = #{articleId}")
     void decrementCommentCount(@Param("articleId") int articleId, @Param("count") int count);
+
+    @Select("Select c.*, u.name as authorName, u.avatar_url as authorAvatar " +
+            "from comments c " +
+            "JOIN user u on c.author_id = u.id " +
+            "where c.article_id = #{articleId}")
+    List<Comment> GetComment(int articleId);
+
+    @Select("Select author_id from articles where id= #{articleId}")
+    int getAuthorIdById(int articleId);
+
+    @Delete("Delete from articles where id = #{articleId}")
+    void deleteArticle(int articleId);
+
+    @Select("SELECT a.*, u.name as authorName, u.avatar_url as authorAvatarUrl " +
+            "FROM articles a " +
+            "INNER JOIN user u ON a.author_id = u.id " +
+            "WHERE title LIKE CONCAT('%', #{keyword}, '%')")
+    List<Article> searchArticles(@Param("keyword") String keyword);
 }

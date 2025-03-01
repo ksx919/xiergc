@@ -1,9 +1,6 @@
 package com.example.xiergc.controller;
 
-import com.example.xiergc.entity.Article;
-import com.example.xiergc.entity.ArticleDTO;
-import com.example.xiergc.entity.Comment;
-import com.example.xiergc.entity.Result;
+import com.example.xiergc.entity.*;
 import com.example.xiergc.service.ArticleService;
 import com.example.xiergc.utils.ThreadLocalUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +83,13 @@ public class ArticleController {
         return Result.success(savedComment);
     }
 
+    //获取文章的所有评论
+    @GetMapping("/{articleId}/GetComment")
+    public Result<List<Comment>> GetComment(@PathVariable int articleId) {
+        List<Comment> comments = articleService.GetComment(articleId);
+        return Result.success(comments);
+    }
+
     // 发布文章
     @PostMapping("/post")
     public Result postArticle(@RequestBody Article article) {
@@ -108,5 +112,29 @@ public class ArticleController {
 
         articleService.deleteComment(articleId, commentId);
         return Result.success();
+    }
+
+    //删除文章
+    @DeleteMapping("/{articleId}/delete")
+    public Result deleteArticle(@PathVariable int articleId) {
+        Map<String, Object> claims = ThreadLocalUtil.get();
+        int userId = (int) claims.get("id");
+        int authorId = articleService.getAuthorIdById(articleId);
+        if(userId != authorId){
+            return Result.error("你无权删除该文章");
+        }
+        articleService.deleteArticle(articleId);
+        return Result.success();
+    }
+
+    // 实现模糊搜索接口
+    @PostMapping("/search")
+    public Result<List<Article>> searchArticles(@RequestBody KeyWordDTO searchRequest) {
+        String keyword = searchRequest.getKeyword();
+        List<Article> articles = articleService.searchArticles(keyword);
+        if (articles.isEmpty()) {
+            return Result.error("没有找到相关文章");
+        }
+        return Result.success(articles);
     }
 }

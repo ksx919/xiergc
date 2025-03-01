@@ -3,6 +3,7 @@ package com.example.xiergc.service;
 import com.example.xiergc.entity.Article;
 import com.example.xiergc.entity.ArticleDTO;
 import com.example.xiergc.entity.Comment;
+import com.example.xiergc.entity.KeyWordDTO;
 
 import java.util.List;
 
@@ -34,4 +35,12 @@ public interface ArticleService {
     Comment addSubComment(int articleId, int parentCommentId, Comment subComment);
 
     void deleteComment(int articleId, int commentId);
+
+    List<Comment> GetComment(int articleId);
+
+    void deleteArticle(int articleId);
+
+    int getAuthorIdById(int articleId);
+
+    List<Article> searchArticles(String keyword);
 }

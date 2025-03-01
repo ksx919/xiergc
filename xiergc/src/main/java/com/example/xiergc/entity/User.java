@@ -1,6 +1,7 @@
 package com.example.xiergc.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -28,7 +29,7 @@ public class User {
     private String bio;
 
     @URL(message = "头像地址必须是合法的URL")
-    private String avatar;
+    private String avatarUrl;
     private LocalDateTime regTime;
     private LocalDateTime lastLoginTime;
 }

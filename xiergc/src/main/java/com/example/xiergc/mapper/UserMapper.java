@@ -37,9 +37,7 @@ public interface UserMapper {
     @Select("SELECT * FROM articles WHERE author_id = #{id} ORDER BY publish_date DESC")
     List<Article> GetCreated(int id);
 
-    @Select("SELECT articles.* ," +
-            "user.name AS author_name, " +
-            "user.avatar_url AS author_avatar_url " +
+    @Select("SELECT articles.*, user.name AS author_name, user.avatar_url AS author_avatar_url " +
             "FROM articles " +
             "INNER JOIN article_likes ON articles.id = article_likes.article_id " +
             "INNER JOIN user ON articles.author_id = user.id " +
@@ -47,9 +45,7 @@ public interface UserMapper {
             "ORDER BY articles.publish_date DESC")
     List<Article> GetLiked(int id);
 
-    @Select("SELECT articles.*, " +
-            "user.name AS author_name, " +
-            "user.avatar_url AS author_avatar_url" +
+    @Select("SELECT articles.*, user.name AS author_name, user.avatar_url AS author_avatar_url " +
             "FROM articles " +
             "INNER JOIN article_collections ON articles.id = article_collections.article_id " +
             "INNER JOIN user ON articles.author_id = user.id " +
