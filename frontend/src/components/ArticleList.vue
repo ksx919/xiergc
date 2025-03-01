@@ -5,12 +5,14 @@
       <span class="category-item">关注</span>
       <span
         class="category-item"
+        :class="{ 'category-item-selected': selectedCategory === 'ranking' }"
         @click="fetchArticles('ranking')"
       >
         推荐
       </span>
       <span
         class="category-item"
+        :class="{ 'category-item-selected': selectedCategory === 'latest' }"
         @click="fetchArticles('latest')"
       >
         最新
@@ -27,26 +29,27 @@
         <div class="article-item">
           <div class="article-header">
             <!-- 修改头像部分 -->
-            <img 
-              class="avatar" 
-              :src="article.authorAvatarUrl || defaultAvatarSrc" 
+            <img
+              class="avatar"
+              :src="article.authorAvatarUrl || defaultAvatarSrc"
               alt="作者头像"
             />
             <div class="author-info">
               <!-- 修改作者名称部分 -->
-              <span class="nickname">{{ article.authorName || '匿名作者' }}</span>
+              <span class="nickname">{{
+                article.authorName || "匿名作者"
+              }}</span>
               <span class="date">{{ formatDate(article.publishDate) }}</span>
             </div>
           </div>
           <div class="article-content">
             <div class="article-text">
               <h2>{{ article.title }}</h2>
-              <div 
+              <div
                 class="markdown-preview"
                 v-html="renderMarkdownPreview(article.content)"
               ></div>
             </div>
-            
           </div>
           <div class="article-actions">
             <img class="action-icon" :src="clickIconSrc" alt="点击数" />
@@ -65,9 +68,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted } from "vue";
 import instance from "@/api/axios.js";
-import MarkdownIt from 'markdown-it';
+import MarkdownIt from "markdown-it";
 
 // 图片路径
 const defaultAvatarSrc = require("@/assets/image/Userde.png");
@@ -83,10 +86,11 @@ const jwtToken = localStorage.getItem("jwtToken");
 const md = new MarkdownIt({
   html: false,
   breaks: true,
-  linkify: true
+  linkify: true,
 });
 
 const isNavigating = ref(false);
+const selectedCategory = ref("ranking"); // 新增变量记录选中的分类
 
 const handleArticleClick = async (articleId) => {
   if (isNavigating.value) return;
@@ -100,11 +104,11 @@ const handleArticleClick = async (articleId) => {
       {
         headers: {
           Authorization: `${jwtToken}`,
-          'Content-Type': 'application/json'
-        }
+          "Content-Type": "application/json",
+        },
       }
     );
-    
+
     // 请求完成后跳转页面
     window.location.href = `/article/${articleId}`;
   } finally {
@@ -113,73 +117,90 @@ const handleArticleClick = async (articleId) => {
 };
 
 const renderMarkdownPreview = (content) => {
-  if (!content) return '';
+  if (!content) return "";
   const maxLength = 100;
   const preview = content.slice(0, maxLength);
-  const lastNewLine = preview.lastIndexOf('\n');
-  const sanitizedContent = preview.slice(0, lastNewLine > 0 ? lastNewLine : maxLength);
-  return md.render(sanitizedContent + (content.length > maxLength ? '...' : ''));
+  const lastNewLine = preview.lastIndexOf("\n");
+  const sanitizedContent = preview.slice(
+    0,
+    lastNewLine > 0 ? lastNewLine : maxLength
+  );
+  return md.render(
+    sanitizedContent + (content.length > maxLength ? "..." : "")
+  );
 };
 
 // 新版日期格式化函数
 const formatDate = (dateArray) => {
   try {
-    if (!Array.isArray(dateArray)) return '无效日期格式';
-    
+    if (!Array.isArray(dateArray)) return "无效日期格式";
+
     // 确保数组长度足够
     const paddedDate = [...dateArray];
-    while(paddedDate.length < 6) paddedDate.push(0);
+    while (paddedDate.length < 6) paddedDate.push(0);
 
     const [year, month, day, hours, minutes] = paddedDate;
 
     // 基础验证
     if (
-      typeof year !== 'number' || year < 1970 || year > 2100 ||
-      typeof month !== 'number' || month < 1 || month > 12 ||
-      typeof day !== 'number' || day < 1 || day > 31 ||
-      typeof hours !== 'number' || hours < 0 || hours > 23 ||
-      typeof minutes !== 'number' || minutes < 0 || minutes > 59
+      typeof year !== "number" ||
+      year < 1970 ||
+      year > 2100 ||
+      typeof month !== "number" ||
+      month < 1 ||
+      month > 12 ||
+      typeof day !== "number" ||
+      day < 1 ||
+      day > 31 ||
+      typeof hours !== "number" ||
+      hours < 0 ||
+      hours > 23 ||
+      typeof minutes !== "number" ||
+      minutes < 0 ||
+      minutes > 59
     ) {
-      return '日期数据异常';
+      return "日期数据异常";
     }
 
     // 直接拼接成目标格式
-    return `${year}-${month}-${day} ${hours}:${minutes.toString().padStart(2, '0')}`;
-    
+    return `${year}-${month}-${day} ${hours}:${minutes
+      .toString()
+      .padStart(2, "0")}`;
   } catch (error) {
-    console.error('日期处理失败:', error);
-    return '日期解析错误';
+    console.error("日期处理失败:", error);
+    return "日期解析错误";
   }
 };
 
 // 获取文章数据
 const fetchArticles = async (type) => {
-  let url = '';
-  
+  let url = "";
+
   // 根据分类类型设置请求的 URL
-  if (type === 'ranking') {
-    url = '/articles/ranking'; // 关注
-  } else if (type === 'latest') {
-    url = '/articles/latest'; // 最新
+  if (type === "ranking") {
+    url = "/articles/ranking"; // 关注
+  } else if (type === "latest") {
+    url = "/articles/latest"; // 最新
   }
 
   try {
     const response = await instance.get(url, {
       headers: {
-        Authorization: `${jwtToken}`
-      }
+        Authorization: `${jwtToken}`,
+      },
     });
     if (response.data.code === 0) {
       articles.value = response.data.data;
     }
+    selectedCategory.value = type; // 更新选中的分类
   } catch (error) {
-    console.error('Error fetching articles:', error);
+    console.error("Error fetching articles:", error);
   }
 };
 
 // 在组件挂载时默认请求“推荐”文章
 onMounted(() => {
-  fetchArticles('ranking');
+  fetchArticles("ranking");
 });
 </script>
 
@@ -197,7 +218,7 @@ onMounted(() => {
 }
 
 .markdown-preview :deep() code {
-  background: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.1);
   padding: 2px 4px;
   border-radius: 3px;
 }
@@ -230,6 +251,11 @@ onMounted(() => {
 
 .category-item:hover {
   color: #ffffff;
+}
+
+.category-item-selected {
+  color: #00a1d6; /* 选中状态的颜色，可根据需求修改 */
+  text-decoration: underline; /* 选中状态的下划线，可根据需求修改 */
 }
 
 .article-list {

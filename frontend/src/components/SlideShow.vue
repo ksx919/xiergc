@@ -44,8 +44,8 @@ onUnmounted(() => {
 <style scoped>
 .slider {
   position: relative;
-  top: 270px;
-  left: 835px;
+  top: 240px;
+  left: 56%;
   transform: translate(-50%, -50%);
   width: 70%;
   /* 设置固定高度，这里假设固定高度为 400px，你可以根据实际情况修改 */

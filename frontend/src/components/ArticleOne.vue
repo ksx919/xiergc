@@ -3,13 +3,10 @@
     <div class="article-top">
       <div class="article-info">
         <h2>{{ article.title }}</h2>
-        <MarkdownViewer 
-          :content="article.content"
-          class="markdown-content"
-        />
+        <MarkdownViewer :content="article.content" class="markdown-content" />
       </div>
     </div>
-    
+
     <div class="article-bottom">
       <span class="date">{{ article.date }}</span>
       <div class="article-actions">
@@ -59,8 +56,8 @@ import {
 import instance from "@/api/axios.js";
 import MarkdownViewer from "@/components/MakeDown/MarkdownViewer.vue";
 
-const isLiked = ref(false)
-const isCollected = ref(false)
+const isLiked = ref(false);
+const isCollected = ref(false);
 const route = useRoute();
 
 // 图片路径
@@ -70,29 +67,31 @@ const sendIconSrc = require("@/assets/image/write.png");
 
 // 初始化文章数据
 const article = ref({
-  title: '加载中...',
-  content: '',
-  date: '',
+  title: "加载中...",
+  content: "",
+  date: "",
   clickCount: 0,
   collectCount: 0,
   likeCount: 0,
-  commentCount: 0
-})
+  commentCount: 0,
+});
 const formatDate = (dateArray) => {
-  if (!dateArray) return '';
+  if (!dateArray) return "";
   const [year, month, day, hour, minute] = dateArray;
-  return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')} ${hour}:${minute.toString().padStart(2, '0')}`;
+  return `${year}-${month.toString().padStart(2, "0")}-${day
+    .toString()
+    .padStart(2, "0")} ${hour}:${minute.toString().padStart(2, "0")}`;
 };
 
 const fetchArticle = async (id) => {
   try {
-    const jwtToken =localStorage.getItem("jwtToken");
-    const { data } = await instance.get(`/articles/${id}`,{
+    const jwtToken = localStorage.getItem("jwtToken");
+    const { data } = await instance.get(`/articles/${id}`, {
       headers: {
         Authorization: `${jwtToken}`,
       },
     });
-    
+
     if (data.code === 0) {
       article.value = {
         title: data.data.title,
@@ -101,45 +100,45 @@ const fetchArticle = async (id) => {
         clickCount: data.data.clicks,
         collectCount: data.data.collect,
         likeCount: data.data.likes,
-        commentCount: data.data.comment
+        commentCount: data.data.comment,
       };
     } else {
-      console.error('获取文章失败:', data.msg);
+      console.error("获取文章失败:", data.msg);
     }
   } catch (error) {
-    console.error('请求失败:', error);
+    console.error("请求失败:", error);
   }
 };
 
-const GetLC = async(id) =>{
-  try{
+const GetLC = async (id) => {
+  try {
     const jwtToken = localStorage.getItem("jwtToken");
-    const {data} = await instance.get(`/articles/${id}/status`,{
-      headers:{
+    const { data } = await instance.get(`/articles/${id}/status`, {
+      headers: {
         Authorization: `${jwtToken}`,
       },
     });
-    if(data.code === 0){
+    if (data.code === 0) {
       // 直接更新响应式变量
-      isLiked.value = data.data.isLiked
-      isCollected.value = data.data.isCollected
+      isLiked.value = data.data.isLiked;
+      isCollected.value = data.data.isCollected;
     }
-  } catch(error){
-    console.error('获取状态失败',error);
+  } catch (error) {
+    console.error("获取状态失败", error);
   }
 };
 
 const toggleLike = async (id) => {
   try {
     const jwtToken = localStorage.getItem("jwtToken");
-    const { data } = await instance.post(`/articles/${id}/like`,null,{
+    const { data } = await instance.post(`/articles/${id}/like`, null, {
       headers: {
         Authorization: `${jwtToken}`,
       },
     });
     if (data.code === 0) {
-      isLiked.value = !isLiked.value
-      article.value.likeCount += isLiked.value ? 1 : -1
+      isLiked.value = !isLiked.value;
+      article.value.likeCount += isLiked.value ? 1 : -1;
     }
   } catch (error) {
     console.error("点赞失败:", error);
@@ -150,21 +149,21 @@ const toggleCollect = async (id) => {
   try {
     const jwtToken = localStorage.getItem("jwtToken");
     const url = `/articles/${id}/collect`;
-    const { data } = await instance.post(url,null,{
+    const { data } = await instance.post(url, null, {
       headers: {
         Authorization: `${jwtToken}`,
       },
     });
     if (data.code === 0) {
-      isCollected.value = !isCollected.value
-      article.value.collectCount += isCollected.value ? 1 : -1
+      isCollected.value = !isCollected.value;
+      article.value.collectCount += isCollected.value ? 1 : -1;
     }
   } catch (error) {
     console.error("收藏失败:", error);
   }
 };
 
-const commentContent = ref('');
+const commentContent = ref("");
 
 const sendComment = async () => {
   if (commentContent.value.trim() === "") {
@@ -177,7 +176,7 @@ const sendComment = async () => {
     const data = {
       content: commentContent.value,
     };
-    const response = await instance.post(url, data,{
+    const response = await instance.post(url, data, {
       headers: {
         Authorization: `${jwtToken}`,
       },
@@ -186,7 +185,7 @@ const sendComment = async () => {
       console.log("发送评论成功:", response.data);
       article.value.commentCount++;
       commentContent.value = "";
-      alert("发送评论成功！")
+      alert("发送评论成功！");
       location.reload();
     }
   } catch (error) {
@@ -196,12 +195,12 @@ const sendComment = async () => {
 
 // 确保正确获取路由参数
 onMounted(() => {
-  const articleId = route.params.id
+  const articleId = route.params.id;
   if (articleId) {
-    fetchArticle(articleId)
-    GetLC(articleId)
+    fetchArticle(articleId);
+    GetLC(articleId);
   }
-})
+});
 </script>
 
 <style scoped>
@@ -214,6 +213,8 @@ onMounted(() => {
   border-radius: 30px;
   margin-bottom: 40px;
   backdrop-filter: blur(5px);
+  width: 100%; /* 设置宽度为100%，占满父容器 */
+  box-sizing: border-box; /* 让padding和border包含在宽度内 */
 }
 
 .article-top {
@@ -223,6 +224,7 @@ onMounted(() => {
 
 .article-info {
   margin-bottom: 30px;
+  word-wrap: break-word; /* 让文字自动换行 */
 }
 
 .article-images {
@@ -233,10 +235,23 @@ onMounted(() => {
 .cover,
 .article-images img {
   /* 让图片宽度占满父容器 */
-  width: 100%;
+  max-width: 100%; /* 设置最大宽度为父容器宽度 */
   height: auto;
   object-fit: cover;
   margin-bottom: 20px; /* 为每张图片添加底部间距 */
+}
+
+.markdown-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+
+/* 如果样式未生效时使用的深度选择器 */
+:deep(.markdown-content) img {
+  max-width: 100%;
+  height: auto;
 }
 
 .article-bottom {

@@ -349,7 +349,7 @@ const toggleConfirmPasswordVisibility = () => {
 .side-nav {
   position: fixed;
   top: 120px;
-  left: 280px;
+  left: 15%;
   background-color: #000000;
   color: white;
   border-right: 1px solid rgba(0, 0, 0, 0.3);

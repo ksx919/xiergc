@@ -6,7 +6,7 @@
 
 <script setup>
 // 引入图片路径，确保带上正确的扩展名
-const toTopIconSrc = require("@/assets/image/post_btn_tohead.png");
+const toTopIconSrc = require("@/assets/image/To-Top.png");
 
 // 滚动到顶部的方法
 const scrollToTop = () => {
@@ -34,8 +34,8 @@ const scrollToTop = () => {
 }
 
 .to-top-image {
-  width: 25px;
-  height: 25px;
+  width: 30px;
+  height: 30px;
   object-fit: contain;
   background-color: transparent;
 }
