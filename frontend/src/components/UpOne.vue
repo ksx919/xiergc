@@ -80,7 +80,7 @@ body {
   /* 固定在窗口右上角 */
   position: fixed;
   top: 110px;
-  right: 233px;
+  right: 15%;
   width: 350px;
   height: 130px;
   /* 应用黑色框属性 */

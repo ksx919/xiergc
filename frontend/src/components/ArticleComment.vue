@@ -150,6 +150,7 @@ const sendNewComment = async (index) => {
       newComment.value[index] = "";
       isCommentSectionOpen.value[index] = false;
       alert("评论发送成功！");
+      location.reload();
     }
   } catch (error) {
     console.error("发送评论失败:", error);

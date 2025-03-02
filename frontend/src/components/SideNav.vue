@@ -85,7 +85,7 @@ const updateActive = (index) => {
 .side-nav {
   position: fixed;
   top: 120px;
-  left: 20%;
+  left: 15.5%;
   background-color: #000000;
   color: white;
   border-right: 1px solid rgba(0, 0, 0, 0.3);

@@ -337,7 +337,8 @@ onMounted(() => {
 .article-text {
   flex: 1;
   margin-top: 20px;
-  margin-right: 60%;
+  margin-right: 30%;
+  margin-bottom: 20px;
 }
 
 .cover {
