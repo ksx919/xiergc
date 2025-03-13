@@ -75,8 +75,8 @@ public class UserController {
     @GetMapping("/profile")
     public Result<User> profile() {
         Map<String,Object> map= ThreadLocalUtil.get();
-        String username=(String) map.get("username");
-        User user = userService.findByUserName(username);
+        Long id=((Number) map.get("id")).longValue();
+        User user = userService.findById(id);
         return Result.success(user);
     }
 
@@ -138,7 +138,7 @@ public class UserController {
     @GetMapping("/created")
     public Result<List<Article>> created() {
         Map<String,Object> map= ThreadLocalUtil.get();
-        int id =(int) map.get("id");
+        Long id =((Number) map.get("id")).longValue();
         List<Article> articles = userService.GetCreated(id);
         return Result.success(articles);
     }
@@ -147,7 +147,7 @@ public class UserController {
     @GetMapping("/liked")
     public Result<List<Article>> liked() {
         Map<String,Object> map= ThreadLocalUtil.get();
-        int id =(int) map.get("id");
+        Long id =((Number) map.get("id")).longValue();
         List<Article> articles = userService.Getliked(id);
         return Result.success(articles);
     }
@@ -156,7 +156,7 @@ public class UserController {
     @GetMapping("/collected")
     public Result<List<Article>> collected() {
         Map<String,Object> map= ThreadLocalUtil.get();
-        int id =(int) map.get("id");
+        Long id =((Number) map.get("id")).longValue();
         List<Article> articles = userService.GetCollected(id);
         return Result.success(articles);
     }

@@ -2,11 +2,9 @@ package com.example.xiergc.service;
 
 import com.example.xiergc.entity.Article;
 import com.example.xiergc.entity.User;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 
 import java.util.List;
+
 
 public interface UserService {
     //根据用户名查询用户
@@ -28,9 +26,11 @@ public interface UserService {
     void updatePwd(String newPwd);
 
     //获取用户创建的文章
-    List<Article> GetCreated(int id);
+    List<Article> GetCreated(Long id);
 
-    List<Article> Getliked(int id);
+    List<Article> Getliked(Long id);
 
-    List<Article> GetCollected(int id);
+    List<Article> GetCollected(Long id);
+
+    User findById(Long id);
 }

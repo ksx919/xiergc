@@ -4,6 +4,7 @@ import com.example.xiergc.entity.Article;
 import com.example.xiergc.entity.ArticleDTO;
 import com.example.xiergc.entity.Comment;
 import com.example.xiergc.entity.KeyWordDTO;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -16,7 +17,7 @@ public interface ArticleService {
     List<Article> getLatestArticles();
 
     // 获取指定 ID 的文章内容
-    Article getArticleById(int id);
+    Article getArticleById(Long id);
 
     // 添加评论
     void addComment(Comment comment);
@@ -24,23 +25,23 @@ public interface ArticleService {
     // 发布新文章
     void publishArticle(Article article);
 
-    void incrementArticleClicks(int id);
+    void incrementArticleClicks(Long id);
 
-    ArticleDTO getArticleWithStatus(int id, int userId);
+    ArticleDTO getArticleWithStatus(Long id, Long userId);
 
-    void toggleLike(int articleId, int userId);
+    void toggleLike(Long articleId, Long userId);
 
-    void toggleCollect(int articleId, int userId);
+    void toggleCollect(Long articleId, Long userId);
 
-    Comment addSubComment(int articleId, int parentCommentId, Comment subComment);
+    Comment addSubComment(Long articleId, Long parentCommentId, Comment subComment);
 
-    void deleteComment(int articleId, int commentId);
+    void deleteComment(Long articleId, Long commentId);
 
-    List<Comment> GetComment(int articleId);
+    List<Comment> GetComment(Long articleId);
 
-    void deleteArticle(int articleId);
+    void deleteArticle(Long articleId);
 
-    int getAuthorIdById(int articleId);
+    Long getAuthorIdById(Long articleId);
 
     List<Article> searchArticles(String keyword);
 }

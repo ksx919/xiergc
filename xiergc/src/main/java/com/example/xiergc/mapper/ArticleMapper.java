@@ -9,105 +9,52 @@ import java.util.List;
 
 @Mapper
 public interface ArticleMapper {
-    @Select("SELECT a.*, u.name AS authorName, u.avatar_url AS authorAvatarUrl, " +
-            "EXISTS(SELECT 1 FROM article_likes WHERE user_id = #{userId} AND article_id = a.id) AS isLiked, " +
-            "EXISTS(SELECT 1 FROM article_collections WHERE user_id = #{userId} AND article_id = a.id) AS isCollected " +
-            "FROM articles a " +
-            "JOIN user u ON a.author_id = u.id " +
-            "WHERE a.id = #{id}")
-    ArticleDTO getArticleWithStatus(@Param("id") int id, @Param("userId") int userId);
+    ArticleDTO getArticleWithStatus(@Param("id") Long id, @Param("userId") Long userId);
 
-    @Select("SELECT COUNT(*) FROM article_likes WHERE user_id = #{userId} AND article_id = #{articleId}")
-    boolean existsLike(@Param("userId") int userId, @Param("articleId") int articleId);
+    boolean existsLike(@Param("userId") Long userId, @Param("articleId") Long articleId);
 
-    @Insert("INSERT INTO article_likes (user_id, article_id) VALUES (#{userId}, #{articleId})")
-    void addLike(@Param("userId") int userId, @Param("articleId") int articleId);
+    void addLike(@Param("userId") Long userId, @Param("articleId") Long articleId);
 
-    @Delete("DELETE FROM article_likes WHERE user_id = #{userId} AND article_id = #{articleId}")
-    void removeLike(@Param("userId") int userId, @Param("articleId") int articleId);
+    void removeLike(@Param("userId") Long userId, @Param("articleId") Long articleId);
 
-    @Select("SELECT COUNT(*) FROM article_collections WHERE user_id = #{userId} AND article_id = #{articleId}")
-    boolean existsCollect(@Param("userId") int userId, @Param("articleId") int articleId);
+    boolean existsCollect(@Param("userId") Long userId, @Param("articleId") Long articleId);
 
-    @Insert("INSERT INTO article_collections (user_id, article_id) VALUES (#{userId}, #{articleId})")
-    void addCollect(@Param("userId") int userId, @Param("articleId") int articleId);
+    void addCollect(@Param("userId") Long userId, @Param("articleId") Long articleId);
 
-    @Delete("DELETE FROM article_collections WHERE user_id = #{userId} AND article_id = #{articleId}")
-    void removeCollect(@Param("userId") int userId, @Param("articleId") int articleId);
+    void removeCollect(@Param("userId") Long userId, @Param("articleId") Long articleId);
 
-    @Update("UPDATE articles SET likes = likes + #{amount} WHERE id = #{id}")
-    void updateLikes(@Param("id") int id, @Param("amount") int amount);
+    void updateLikes(@Param("id") Long id, @Param("amount") int amount);
 
-    @Update("UPDATE articles SET collect = collect + #{amount} WHERE id = #{id}")
-    void updateCollects(@Param("id") int id, @Param("amount") int amount);
+    void updateCollects(@Param("id") Long id, @Param("amount") int amount);
 
-    @Select("SELECT a.*, u.name as authorName, u.avatar_url as authorAvatarUrl " +
-            "FROM articles a " +
-            "LEFT JOIN user u ON a.author_id = u.id " +
-            "ORDER BY clicks DESC LIMIT 10")
     List<Article> getArticlesRankedByClicks();
 
-    @Select("SELECT a.*, u.name as authorName, u.avatar_url as authorAvatarUrl " +
-            "FROM articles a " +
-            "LEFT JOIN user u ON a.author_id = u.id " +
-            "ORDER BY publish_date DESC LIMIT 10")
     List<Article> getLatestArticles();
 
-    @Select("SELECT a.*, u.name AS authorName, u.avatar_url AS authorAvatarUrl " +
-            "FROM articles a " +
-            "JOIN user u ON a.author_id = u.id " +
-            "WHERE a.id = #{id}")
-    Article getArticleById(int id);
+    Article getArticleById(Long id);
 
-    @Insert("INSERT INTO comments (article_id, author_id, content, publish_date) " +
-            "VALUES (#{articleId}, #{authorId}, #{content}, NOW())")
-    void addComment(int articleId,int authorId,String content);
+    void addComment(Long articleId,Long authorId,String content);
 
-    @Insert("INSERT INTO articles (title, author_id, content, publish_date) " +
-            "VALUES (#{title}, #{authorId}, #{content}, NOW())")
-    void addArticle(String title,int authorId,String content);
+    void addArticle(String title,Long authorId,String content);
 
-    @Update("UPDATE articles SET clicks = clicks + 1 WHERE id = #{id}")
-    void incrementArticleClicks(int id);
+    void incrementArticleClicks(Long id);
 
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
-    @Insert("INSERT INTO comments (article_id, author_id, content, publish_date, reply_to) " +
-            "VALUES (#{articleId}, #{authorId}, #{content}, NOW(), #{replyTo})")
-    int addSubComment(Comment comment);
+    Long addSubComment(Comment comment);
 
-    @Update("UPDATE articles SET comment = comment + 1 WHERE id = #{articleId}")
-    void incrementCommentCount(int articleId);
+    void incrementCommentCount(Long articleId);
 
-    @Select("SELECT * FROM comments WHERE id = #{id}")
-    @Results({
-            @Result(property = "articleId", column = "article_id"),
-            @Result(property = "authorId", column = "author_id"),
-            @Result(property = "publishDate", column = "publish_date"),
-            @Result(property = "replyTo", column = "reply_to")
-    })
-    Comment getCommentById(int id);
+    Comment getCommentById(Long id);
 
-    @Delete("DELETE FROM comments WHERE id = #{commentId} OR reply_to = #{commentId}")
-    int deleteCommentAndSubComments(@Param("commentId") int commentId);
+    Long deleteCommentAndSubComments(@Param("commentId") Long commentId);
 
-    @Update("UPDATE articles SET comment = comment - #{count} WHERE id = #{articleId}")
-    void decrementCommentCount(@Param("articleId") int articleId, @Param("count") int count);
+    void decrementCommentCount(@Param("articleId") Long articleId, @Param("count") Long count);
 
-    @Select("Select c.*, u.name as authorName, u.avatar_url as authorAvatar " +
-            "from comments c " +
-            "JOIN user u on c.author_id = u.id " +
-            "where c.article_id = #{articleId}")
-    List<Comment> GetComment(int articleId);
+    List<Comment> GetComment(Long articleId);
 
-    @Select("Select author_id from articles where id= #{articleId}")
-    int getAuthorIdById(int articleId);
+    Long getAuthorIdById(Long articleId);
 
-    @Delete("Delete from articles where id = #{articleId}")
-    void deleteArticle(int articleId);
+    void deleteArticle(Long articleId);
 
-    @Select("SELECT a.*, u.name as authorName, u.avatar_url as authorAvatarUrl " +
-            "FROM articles a " +
-            "INNER JOIN user u ON a.author_id = u.id " +
-            "WHERE title LIKE CONCAT('%', #{keyword}, '%')")
     List<Article> searchArticles(@Param("keyword") String keyword);
 }

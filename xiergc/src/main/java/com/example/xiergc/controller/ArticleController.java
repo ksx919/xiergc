@@ -4,6 +4,7 @@ import com.example.xiergc.entity.*;
 import com.example.xiergc.service.ArticleService;
 import com.example.xiergc.utils.ThreadLocalUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,41 +33,44 @@ public class ArticleController {
 
     // 获取文章内容
     @GetMapping("/{id}")
-    public Result<Article> getArticleDetails(@PathVariable int id) {
+    public Result<Article> getArticleDetails(@PathVariable Long id) {
         Article article = articleService.getArticleById(id);
+        if(article == null) {
+            return Result.error("文章不存在");
+        }
         return Result.success(article);
     }
 
     // 获取文章详情（带状态）
     @GetMapping("/{id}/status")
-    public Result<ArticleDTO> getArticleStatus(@PathVariable int id) {
+    public Result<ArticleDTO> getArticleStatus(@PathVariable Long id) {
         Map<String, Object> claims = ThreadLocalUtil.get();
-        int userId = claims != null ? (int) claims.get("id") : 0;
+        Long userId = claims != null ? ((Number) claims.get("id")).longValue() : 0L;
         ArticleDTO article = articleService.getArticleWithStatus(id, userId);
         return Result.success(article);
     }
 
     // 点赞/取消点赞
     @PostMapping("/{id}/like")
-    public Result toggleLike(@PathVariable int id) {
+    public Result toggleLike(@PathVariable Long id) {
         Map<String, Object> claims = ThreadLocalUtil.get();
-        int userId = (int) claims.get("id");
+        Long userId = ((Number) claims.get("id")).longValue();
         articleService.toggleLike(id, userId);
         return Result.success();
     }
 
     // 收藏/取消收藏
     @PostMapping("/{id}/collect")
-    public Result toggleCollect(@PathVariable int id) {
+    public Result toggleCollect(@PathVariable Long id) {
         Map<String, Object> claims = ThreadLocalUtil.get();
-        int userId = (int) claims.get("id");
+        Long userId = ((Number) claims.get("id")).longValue();
         articleService.toggleCollect(id, userId);
         return Result.success();
     }
 
     //评论文章
     @PostMapping("/{id}/comments")
-    public Result commentArticle(@PathVariable int id, @RequestBody Comment comment) {
+    public Result commentArticle(@PathVariable Long id, @RequestBody Comment comment) {
         comment.setArticleId(id);
         articleService.addComment(comment);
         return Result.success();
@@ -75,8 +79,8 @@ public class ArticleController {
     //发布子评论
     @PostMapping("/{articleId}/comments/{parentCommentId}")
     public Result<Comment> SubComment(
-            @PathVariable int articleId,
-            @PathVariable int parentCommentId,
+            @PathVariable Long articleId,
+            @PathVariable Long parentCommentId,
             @RequestBody Comment subComment) {
 
         Comment savedComment = articleService.addSubComment(articleId, parentCommentId, subComment);
@@ -85,7 +89,7 @@ public class ArticleController {
 
     //获取文章的所有评论
     @GetMapping("/{articleId}/GetComment")
-    public Result<List<Comment>> GetComment(@PathVariable int articleId) {
+    public Result<List<Comment>> GetComment(@PathVariable Long articleId) {
         List<Comment> comments = articleService.GetComment(articleId);
         return Result.success(comments);
     }
@@ -99,7 +103,7 @@ public class ArticleController {
 
     //添加点击数
     @PostMapping("/{id}/click")
-    public Result incrementClicks(@PathVariable int id) {
+    public Result incrementClicks(@PathVariable Long id) {
         articleService.incrementArticleClicks(id);
         return Result.success();
     }
@@ -107,8 +111,8 @@ public class ArticleController {
     //删除评论
     @DeleteMapping("/{articleId}/comments/{commentId}")
     public Result deleteComment(
-            @PathVariable int articleId,
-            @PathVariable int commentId) {
+            @PathVariable Long articleId,
+            @PathVariable Long commentId) {
 
         articleService.deleteComment(articleId, commentId);
         return Result.success();
@@ -116,10 +120,10 @@ public class ArticleController {
 
     //删除文章
     @DeleteMapping("/{articleId}/delete")
-    public Result deleteArticle(@PathVariable int articleId) {
+    public Result deleteArticle(@PathVariable Long articleId) {
         Map<String, Object> claims = ThreadLocalUtil.get();
-        int userId = (int) claims.get("id");
-        int authorId = articleService.getAuthorIdById(articleId);
+        Long userId = ((Number) claims.get("id")).longValue();
+        Long authorId = articleService.getAuthorIdById(articleId);
         if(userId != authorId){
             return Result.error("你无权删除该文章");
         }
