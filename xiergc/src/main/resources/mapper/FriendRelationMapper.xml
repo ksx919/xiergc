@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.xiergc.mapper.FriendRelationMapper">
+    
+    <insert id="insert" parameterType="com.example.xiergc.entity.FriendRelation">
+        INSERT INTO friend_relation(user_id, friend_id, relation_type, created_at)
+        VALUES(#{userId}, #{friendId}, #{relationType}, #{createdAt})
+    </insert>
+
+    <delete id="deleteRelation">
+        DELETE FROM friend_relation
+        WHERE user_id = #{userId} AND friend_id = #{friendId}
+    </delete>
+
+    <select id="isFriends" resultType="java.lang.Boolean">
+        SELECT COUNT(*) > 0 
+        FROM friend_relation
+        WHERE user_id = #{user1} 
+        AND friend_id = #{user2} 
+        AND relation_type = 'FRIEND'
+    </select>
+
+    <select id="getFriendList" resultType="com.example.xiergc.dto.UserDTO">
+        SELECT 
+            u.name as name,
+            u.avatar_url as avatarUrl,
+            u.bio as bio
+        FROM user u 
+        INNER JOIN friend_relation f on u.id = f.user_id
+        AND f.relation_type = 'FRIEND'
+    </select>
+
+    <select id="isBlocked" resultType="java.lang.Boolean">
+        SELECT COUNT(*) > 0 
+        FROM friend_relation
+        WHERE user_id = #{blockerId} 
+        AND friend_id = #{blockedId} 
+        AND relation_type = 'BLOCKED'
+    </select>
+</mapper> 

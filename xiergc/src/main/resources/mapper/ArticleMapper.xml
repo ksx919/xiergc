@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.xiergc.mapper.ArticleMapper">
+    <select id="getArticleWithStatus" resultType="com.example.xiergc.dto.ArticleDTO">
+        SELECT 
+            a.id as id,
+            a.title as title,
+            a.content as content,
+            a.author_id as authorId,
+            a.publish_date as publishDate,
+            a.clicks as clicks,
+            a.collect as collect,
+            a.likes as likes,
+            a.comment as comment,
+            u.name as authorName,
+            u.avatar_url as authorAvatarUrl,
+            EXISTS(SELECT 1 FROM article_likes WHERE user_id = #{userId} AND article_id = a.id) as isLiked,
+            EXISTS(SELECT 1 FROM article_collections WHERE user_id = #{userId} AND article_id = a.id) as isCollected
+        FROM articles a 
+        JOIN user u ON a.author_id = u.id 
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="existsLike" resultType="boolean">
+        SELECT COUNT(*) > 0 
+        FROM article_likes 
+        WHERE user_id = #{userId} AND article_id = #{articleId}
+    </select>
+
+    <insert id="addLike">
+        INSERT INTO article_likes (user_id, article_id) 
+        VALUES (#{userId}, #{articleId})
+    </insert>
+
+    <delete id="removeLike">
+        DELETE FROM article_likes 
+        WHERE user_id = #{userId} AND article_id = #{articleId}
+    </delete>
+
+    <select id="existsCollect" resultType="boolean">
+        SELECT COUNT(*) > 0 
+        FROM article_collections 
+        WHERE user_id = #{userId} AND article_id = #{articleId}
+    </select>
+
+    <insert id="addCollect">
+        INSERT INTO article_collections (user_id, article_id) 
+        VALUES (#{userId}, #{articleId})
+    </insert>
+
+    <delete id="removeCollect">
+        DELETE FROM article_collections 
+        WHERE user_id = #{userId} AND article_id = #{articleId}
+    </delete>
+
+    <update id="updateLikes">
+        UPDATE articles 
+        SET likes = likes + #{amount} 
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateCollects">
+        UPDATE articles 
+        SET collect = collect + #{amount} 
+        WHERE id = #{id}
+    </update>
+
+    <select id="getArticlesRankedByClicks" resultType="com.example.xiergc.entity.Article">
+        SELECT 
+            a.id as id,
+            a.title as title,
+            a.content as content,
+            a.author_id as authorId,
+            a.publish_date as publishDate,
+            a.clicks as clicks,
+            a.collect as collect,
+            a.likes as likes,
+            a.comment as comment,
+            u.name as authorName,
+            u.avatar_url as authorAvatarUrl
+        FROM articles a
+        LEFT JOIN user u ON a.author_id = u.id 
+        ORDER BY a.clicks DESC 
+        LIMIT 10
+    </select>
+
+    <select id="getLatestArticles" resultType="com.example.xiergc.entity.Article">
+        SELECT 
+            a.id as id,
+            a.title as title,
+            a.content as content,
+            a.author_id as authorId,
+            a.publish_date as publishDate,
+            a.clicks as clicks,
+            a.collect as collect,
+            a.likes as likes,
+            a.comment as comment,
+            u.name as authorName,
+            u.avatar_url as authorAvatarUrl
+        FROM articles a
+        LEFT JOIN user u ON a.author_id = u.id 
+        ORDER BY a.publish_date DESC 
+        LIMIT 10
+    </select>
+
+    <select id="getArticleById" resultType="com.example.xiergc.entity.Article">
+        SELECT 
+            a.id as id,
+            a.title as title,
+            a.content as content,
+            a.author_id as authorId,
+            a.publish_date as publishDate,
+            a.clicks as clicks,
+            a.collect as collect,
+            a.likes as likes,
+            a.comment as comment,
+            u.name as authorName,
+            u.avatar_url as authorAvatarUrl
+        FROM articles a
+        JOIN user u ON a.author_id = u.id 
+        WHERE a.id = #{id}
+    </select>
+
+    <insert id="addComment">
+        INSERT INTO comments (article_id, author_id, content, publish_date)
+        VALUES (#{articleId}, #{authorId}, #{content}, NOW())
+    </insert>
+
+    <insert id="addArticle">
+        INSERT INTO articles (title, author_id, content, publish_date)
+        VALUES (#{title}, #{authorId}, #{content}, NOW())
+    </insert>
+
+    <update id="incrementArticleClicks">
+        UPDATE articles 
+        SET clicks = clicks + 1 
+        WHERE id = #{id}
+    </update>
+
+    <insert id="addSubComment" parameterType="com.example.xiergc.entity.Comment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO comments (article_id, author_id, content, publish_date, reply_to)
+        VALUES (#{articleId}, #{authorId}, #{content}, NOW(), #{parentId})
+    </insert>
+
+    <update id="incrementCommentCount">
+        UPDATE articles 
+        SET comment = comment + 1 
+        WHERE id = #{articleId}
+    </update>
+
+    <select id="getCommentById" resultType="com.example.xiergc.entity.Comment">
+        SELECT 
+            id as id,
+            article_id as articleId,
+            author_id as authorId,
+            content as content,
+            publish_date as publishDate,
+            reply_to as replyTo
+        FROM comments 
+        WHERE id = #{id}
+    </select>
+
+    <delete id="deleteCommentAndSubComments">
+        DELETE FROM comments 
+        WHERE id = #{commentId} OR reply_to = #{commentId}
+    </delete>
+
+    <update id="decrementCommentCount">
+        UPDATE articles 
+        SET comment = comment - #{count} 
+        WHERE id = #{articleId}
+    </update>
+
+    <select id="GetComment" resultType="com.example.xiergc.entity.Comment">
+        SELECT 
+            c.id as id,
+            c.article_id as articleId,
+            c.author_id as authorId,
+            c.content as content,
+            c.publish_date as publishDate,
+            c.reply_to as replyTo,
+            u.name as authorName,
+            u.avatar_url as authorAvatarUrl
+        FROM comments c 
+        JOIN user u ON c.author_id = u.id 
+        WHERE c.article_id = #{articleId}
+        ORDER BY c.publish_date DESC
+    </select>
+
+    <select id="getAuthorIdById" resultType="java.lang.Long">
+        SELECT author_id 
+        FROM articles 
+        WHERE id = #{articleId}
+    </select>
+
+    <delete id="deleteArticle">
+        DELETE FROM articles 
+        WHERE id = #{articleId}
+    </delete>
+
+    <select id="searchArticles" resultType="com.example.xiergc.entity.Article">
+        SELECT 
+            a.id as id,
+            a.title as title,
+            a.content as content,
+            a.author_id as authorId,
+            a.publish_date as publishDate,
+            a.clicks as clicks,
+            a.collect as collect,
+            a.likes as likes,
+            a.comment as comment,
+            u.name as authorName,
+            u.avatar_url as authorAvatarUrl
+        FROM articles a
+        INNER JOIN user u ON a.author_id = u.id
+        WHERE LOWER(a.title) LIKE CONCAT('%', LOWER(#{keyword}), '%')
+        OR LOWER(a.content) LIKE CONCAT('%', LOWER(#{keyword}), '%')
+    </select>
+</mapper>

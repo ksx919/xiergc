@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.xiergc.mapper.GroupMemberMapper">
+    
+    <insert id="insert" parameterType="com.example.xiergc.entity.GroupMember">
+        INSERT INTO group_member (group_id, user_id, role, joined_at)
+        VALUES (#{groupId}, #{userId}, #{role}, #{joinedAt})
+    </insert>
+
+    <select id="findByGroupId" resultType="com.example.xiergc.entity.GroupMember">
+        SELECT 
+            group_id as groupId,
+            user_id as userId,
+            role as role,
+            joined_at as joinedAt
+        FROM group_member 
+        WHERE group_id = #{groupId}
+    </select>
+
+    <select id="existsInGroup" resultType="java.lang.Boolean">
+        SELECT EXISTS(
+            SELECT 1 
+            FROM group_member 
+            WHERE group_id = #{groupId} AND user_id = #{userId}
+        )
+    </select>
+
+    <delete id="deleteByGroupAndUser">
+        DELETE FROM group_member 
+        WHERE group_id = #{groupId} AND user_id = #{userId}
+    </delete>
+
+    <delete id="deleteByGroup">
+        DELETE FROM group_member 
+        WHERE group_id = #{groupId}
+    </delete>
+
+    <select id="findAdmins" resultType="com.example.xiergc.entity.GroupMember">
+        SELECT 
+            group_id as groupId,
+            user_id as userId,
+            role as role,
+            joined_at as joinedAt
+        FROM group_member 
+        WHERE group_id = #{groupId} AND role = 'ADMIN'
+    </select>
+
+    <select id="findRoleByUser" resultType="java.lang.String">
+        SELECT role
+        FROM group_member 
+        WHERE group_id = #{groupId} AND user_id = #{userId}
+    </select>
+
+    <update id="updateRoleIfNeeded">
+        UPDATE group_member 
+        SET role = #{role}
+        WHERE group_id = #{groupId} 
+        AND user_id = #{userId} 
+        AND role != #{role}
+    </update>
+</mapper> 

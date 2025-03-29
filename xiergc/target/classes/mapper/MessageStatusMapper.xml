@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.xiergc.mapper.MessageStatusMapper">
+    
+    <insert id="insert" parameterType="com.example.xiergc.entity.MessageStatus">
+        INSERT INTO message_status (message_id, status, create_time, update_time)
+        VALUES (#{messageId}, #{status}, #{createTime}, #{updateTime})
+    </insert>
+
+    <update id="updateStatus" parameterType="com.example.xiergc.entity.MessageStatus">
+        UPDATE message_status 
+        SET status = #{status}, update_time = #{updateTime}
+        WHERE message_id = #{messageId}
+    </update>
+
+    <select id="findByMessageId" resultType="com.example.xiergc.entity.MessageStatus">
+        SELECT 
+            message_id as messageId,
+            status as status,
+            create_time as createTime,
+            update_time as updateTime
+        FROM message_status 
+        WHERE message_id = #{messageId}
+    </select>
+</mapper> 

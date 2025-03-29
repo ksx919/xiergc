@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.xiergc.mapper.UserMapper">
+    <select id="findByUserName" resultType="com.example.xiergc.entity.User">
+        SELECT 
+            id as id,
+            username as username,
+            password as password,
+            name as name,
+            avatar_url as avatarUrl,
+            bio as bio,
+            reg_time as regTime,
+            last_login_time as lastLoginTime
+        FROM user 
+        WHERE username = #{username}
+    </select>
+
+    <select id="findById" resultType="com.example.xiergc.entity.User">
+        SELECT 
+            id as id,
+            username as username,
+            password as password,
+            name as name,
+            avatar_url as avatarUrl,
+            bio as bio,
+            reg_time as regTime,
+            last_login_time as lastLoginTime
+        FROM user 
+        WHERE id = #{id}
+    </select>
+
+    <insert id="add">
+        INSERT INTO user (username, password, name, reg_time)
+        VALUES (#{username}, #{password}, #{name}, NOW())
+    </insert>
+
+    <update id="updateLoginTime">
+        UPDATE user 
+        SET last_login_time = NOW()
+        WHERE username = #{username}
+    </update>
+
+    <update id="updateName">
+        UPDATE user 
+        SET name = #{name}
+        WHERE username = #{username}
+    </update>
+
+    <update id="updateAvatar">
+        UPDATE user 
+        SET avatar_url = #{avatarUrl}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updatePassWord">
+        UPDATE user 
+        SET password = #{password}
+        WHERE id = #{id}
+    </update>
+
+    <select id="GetCreated" resultType="com.example.xiergc.entity.Article">
+        SELECT 
+            id as id,
+            title as title,
+            author_id as authorId,
+            content as content,
+            publish_date as publishDate,
+            clicks as clicks,
+            collect as collect,
+            likes as likes,
+            comment as comment
+        FROM articles 
+        WHERE author_id = #{id} 
+        ORDER BY publish_date DESC
+    </select>
+
+    <select id="GetLiked" resultType="com.example.xiergc.entity.Article">
+        SELECT 
+            a.id as id,
+            a.title as title,
+            a.content as content,
+            a.publish_date as publishDate,
+            a.clicks as clicks,
+            a.collect as collect,
+            a.likes as likes,
+            a.comment as comment,
+            u.name as authorName,
+            u.avatar_url as authorAvatarUrl
+        FROM articles a
+        INNER JOIN article_likes al ON a.id = al.article_id
+        INNER JOIN user u ON a.author_id = u.id
+        WHERE al.user_id = #{id}
+        ORDER BY a.publish_date DESC
+    </select>
+
+    <select id="GetCollected" resultType="com.example.xiergc.entity.Article">
+        SELECT 
+            a.id as id,
+            a.title as title,
+            a.content as content,
+            a.publish_date as publishDate,
+            a.clicks as clicks,
+            a.collect as collect,
+            a.likes as likes,
+            a.comment as comment,
+            u.name as authorName,
+            u.avatar_url as authorAvatarUrl
+        FROM articles a
+        INNER JOIN article_collections ac ON a.id = ac.article_id
+        INNER JOIN user u ON a.author_id = u.id
+        WHERE ac.user_id = #{id}
+        ORDER BY a.publish_date DESC
+    </select>
+
+    <select id="batchSelectUserSimpleInfo" resultType="com.example.xiergc.entity.UserSimpleInfo">
+        SELECT 
+            id as id,
+            name as name,
+            avatar_url as avatarUrl
+        FROM user
+        WHERE id IN
+        <foreach collection="userIds" item="userId" open="(" separator="," close=")">
+            #{userId}
+        </foreach>
+    </select>
+</mapper>
