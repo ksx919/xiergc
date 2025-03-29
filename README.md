@@ -1,8 +1,8 @@
-## 【项⽬背景】
+【项⽬背景】
 
 设计并实现⼀个基于 Spring Boot 的社交博客平台，⽀持⽤⼾发布⽂章、互动评论、好友关系管理等功能，提供⼀个分享知识和交流思想的社交平台。
 
-## 【技术栈】
+【技术栈】
 
 Spring Boot + MyBatis + MySQL + RabbitMQ + Redis + WebSocket
 
@@ -10,7 +10,7 @@ Spring Boot + MyBatis + MySQL + RabbitMQ + Redis + WebSocket
 
 缓存: Redis（主从架构、消息缓存、⽤⼾会话）
 
-## 【⼯作内容】
+【⼯作内容】
 
 用户认证与授权系统：⽀持⽤⼾注册、登录、信息管理
 
